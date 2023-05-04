@@ -1,3 +1,5 @@
+# pip install python-telegram-bot
+# pip install python-telegram-bot[job-queue]
 from telegram import Update, Bot
 from telegram.ext import Application,ApplicationBuilder, CommandHandler, ContextTypes,JobQueue
 
