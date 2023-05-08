@@ -177,8 +177,8 @@ async def set_message_week(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     data=update.message.text
     data=data.replace("/set_message_week","").strip()
     message="Không tìm thấy nhóm này trong danh sách, vui lòng nhập /start để bắt đầu"
-    # try:
-    if True:
+    try:
+    # if True:
         print(data)
         json_data = json.loads(data)
         list_week=validate_list_week(json_data.get("list_week"))
@@ -209,11 +209,9 @@ async def set_message_week(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                     print(group)
                     break
 
-        
-
-    # except Exception as e:
-    #     message="Sai định dạng, vui lòng nhập lại"
-    #     print("ERROR:",e)
+    except Exception as e:
+        message="Sai định dạng, vui lòng nhập lại"
+        print("ERROR:",e)
     save_data()
     await update.message.reply_text(message)
 
