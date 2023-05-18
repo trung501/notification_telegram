@@ -26,6 +26,7 @@ def load_data():
         with open("data.json") as json_file:
             list_group = json.load(json_file)
         print("Load data success")
+        print(list_group)
     except Exception as e:
         print(e)
         list_group=[]
@@ -123,7 +124,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             print("Job auto_send exist")
             break
     if check==False:
-        context.job_queue.run_repeating(send_message,name="auto_send", interval=50, first=0)        
+        context.job_queue.run_repeating(send_message,name="auto_send", interval=10, first=0)        
     await update.message.reply_text(message)
 
 
@@ -136,14 +137,14 @@ async def set_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         json_data = json.loads(data)
         duration = validate_duration(json_data.get("duration"))
         time_receive = validate_time(json_data.get("time_receive"),"%Y-%m-%d %H:%M")
-        message = json_data.get("message")
-        if message is None:
-            message=""
+        _message = json_data.get("message")
+        if _message is None:
+            _message=""
         id=json_data.get("id")
         if id is None and duration is not None and time_receive is not None :
             for group in list_group:
                 if group["chat_id"]==update.message.chat_id:
-                    group["data"].append({"id":get_next_id(group),"time_receive":time_receive,"duration":duration,"message":message})
+                    group["data"].append({"id":get_next_id(group),"time_receive":time_receive,"duration":duration,"message":_message})
                     message="Đã thêm tin nhắn nhắc nhở"
                     print(group)
                     break
@@ -182,9 +183,9 @@ async def set_message_week(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         print(data)
         json_data = json.loads(data)
         list_week=validate_list_week(json_data.get("list_week"))
-        message = json_data.get("message")
-        if message is None:
-            message=""
+        _message = json_data.get("message")
+        if _message is None:
+            _message=""
         _time=validate_time(json_data.get("time"),"%H:%M")
         duration=7
         if list_week is None:
@@ -203,7 +204,7 @@ async def set_message_week(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                         id = get_next_id(group)
                         week= weekday_data[week].get("EN")
                         time_receive = get_next_datetime_from_weekday(week,hour=hour,minute=minute)
-                        group["data"].append({"id":id,"time_receive":time_receive,"duration":duration,"message":message})
+                        group["data"].append({"id":id,"time_receive":time_receive,"duration":duration,"message":_message})
 
                     message="Đã cập nhật tin nhắn nhắc nhở"
                     print(group)
@@ -272,6 +273,7 @@ async def send_message(context: ContextTypes.DEFAULT_TYPE) -> None:
                 between_time = abs((datetime.datetime.now(timezone_Hanoi) - time_receive_aware).total_seconds())
                 if between_time < 100 or datetime.datetime.now(timezone_Hanoi) > time_receive_aware:
                     print(f"between_time: {between_time}")
+                    print(f"send message to {group['name']} has {group['chat_id']}")
                     await bot.send_message(group["chat_id"], message)
                     duration=int(_message["duration"])
                     _message["time_receive"]=(time_receive_aware+datetime.timedelta(days=duration)).strftime("%Y-%m-%d %H:%M")
