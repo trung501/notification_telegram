@@ -144,7 +144,7 @@ async def set_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             for group in list_group:
                 if group["chat_id"]==update.message.chat_id:
                     group["data"].append({"id":get_next_id(group),"time_receive":time_receive,"duration":duration,"message":message})
-                    message="Đã cập nhật tin nhắn nhắc nhở"
+                    message="Đã thêm tin nhắn nhắc nhở"
                     print(group)
                     break
         elif id is not None and duration is not None and time_receive is not None:
@@ -152,7 +152,7 @@ async def set_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 if group["chat_id"]==update.message.chat_id:
                     check=False
                     for _message in group["data"]:
-                        if _message["id"]==json_data["id"]:
+                        if int(_message["id"])==int(json_data["id"]):
                             _message["time_receive"]=json_data["time_receive"]
                             _message["duration"]=json_data["duration"]
                             _message["message"]=json_data["message"]
@@ -161,8 +161,8 @@ async def set_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                             break
                     if check==False:
                         # get next id
-                        group["data"].append({"id":get_next_id(group),"time_receive":time_receive,"duration":duration,"message":message})
-                        message="Đã cập nhật tin nhắn nhắc nhở"
+                        # group["data"].append({"id":get_next_id(group),"time_receive":time_receive,"duration":duration,"message":message})
+                        message="Không tồn tại id này trong danh sách, vui lòng nhập lại"
                         print(group)
                     break
         else:
@@ -217,6 +217,7 @@ async def set_message_week(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 async def get_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message="Không tìm thấy nhóm này trong danh sách, vui lòng nhập /start để bắt đầu"
+    print("chat_id:",update.message.chat_id)
     for group in list_group:
         if group["chat_id"]==update.message.chat_id:
             message="Danh sách tin nhắn nhắc nhở\n"
@@ -264,17 +265,20 @@ async def send_message(context: ContextTypes.DEFAULT_TYPE) -> None:
     bot = Bot(token=token)
     for group in list_group:
         for _message in group["data"]:
-            message=f"Nhắc nhở: {_message['message']}\n"
-            time_receive = datetime.datetime.strptime(_message["time_receive"], "%Y-%m-%d %H:%M")
-            time_receive_aware = timezone_Hanoi.localize(time_receive)
-            between_time = abs((datetime.datetime.now(timezone_Hanoi) - time_receive_aware).total_seconds())
-            if between_time < 100:
-                print(f"between_time: {between_time}")
-                await bot.send_message(group["chat_id"], message)
-                duration=int(_message["duration"])
-                _message["time_receive"]=(time_receive_aware+datetime.timedelta(days=duration)).strftime("%Y-%m-%d %H:%M")
-                save_data()
-                print(f"send message to {group['chat_id']} success")
+            try:
+                message=f"Nhắc nhở: {_message['message']}\n"
+                time_receive = datetime.datetime.strptime(_message["time_receive"], "%Y-%m-%d %H:%M")
+                time_receive_aware = timezone_Hanoi.localize(time_receive)
+                between_time = abs((datetime.datetime.now(timezone_Hanoi) - time_receive_aware).total_seconds())
+                if between_time < 100 or datetime.datetime.now(timezone_Hanoi) > time_receive_aware:
+                    print(f"between_time: {between_time}")
+                    await bot.send_message(group["chat_id"], message)
+                    duration=int(_message["duration"])
+                    _message["time_receive"]=(time_receive_aware+datetime.timedelta(days=duration)).strftime("%Y-%m-%d %H:%M")
+                    save_data()
+                    print(f"send message to {group['chat_id']} success")
+            except Exception as e:
+                print(e)
 
 
 load_data()
