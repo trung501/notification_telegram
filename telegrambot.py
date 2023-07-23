@@ -271,7 +271,7 @@ async def send_message(context: ContextTypes.DEFAULT_TYPE) -> None:
                 time_receive = datetime.datetime.strptime(_message["time_receive"], "%Y-%m-%d %H:%M")
                 time_receive_aware = timezone_Hanoi.localize(time_receive)
                 between_time = abs((datetime.datetime.now(timezone_Hanoi) - time_receive_aware).total_seconds())
-                if between_time < 100 or datetime.datetime.now(timezone_Hanoi) > time_receive_aware:
+                if between_time < 30 or datetime.datetime.now(timezone_Hanoi) > time_receive_aware:
                     print(f"between_time: {between_time}")
                     print(f"send message to {group['name']} has {group['chat_id']}")
                     await bot.send_message(group["chat_id"], message)
