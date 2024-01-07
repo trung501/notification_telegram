@@ -1,4 +1,4 @@
-TOKEN="6207470873:AAF-TRRERujhjgXCYBY8-TxQ8VNdnWdGywNLR4Y"
+TOKEN="token_is_here"
 weekday_dict = {
     'Monday': 'Thứ Hai',
     'Tuesday': 'Thứ Ba',
